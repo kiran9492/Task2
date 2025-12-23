@@ -1,0 +1,63 @@
+pipeline  {
+    agent any
+    environment {
+    DOCKER_IMAGE = "kiranayancha/train-ticket-reservation"
+    DOCKER_TAG   = "v1"
+    DOCKER_CREDENTIALS_ID = "dockerhub-creds"
+}
+    stages {
+        stage('checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/kiran9492/train-ticket-reservation.git']])
+            }
+        }
+        stage('validate') {
+            steps {
+                sh 'mvn validate'
+            }
+        }
+        stage('compile') {
+            steps {
+                sh'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('package') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                echo "Building Docker image"
+                sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+            }
+        }
+         stage('Docker Hub Login') {
+              steps {
+                echo "Logging into Docker Hub"
+                withCredentials([usernamePassword(
+                    credentialsId: DOCKER_CREDENTIALS_ID,
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login \
+                    -u $DOCKER_USER \
+                    --password-stdin
+                    '''
+                }
+            }
+        }
+         stage('Push Image to Docker Hub') {
+             steps {
+                echo "Pushing Docker image to Docker Hub"
+               sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+             }
+        }
+    }
