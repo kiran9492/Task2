@@ -68,6 +68,12 @@ How to Run the Project:
 <img width="1366" height="768" alt="Screenshot (72)" src="https://github.com/user-attachments/assets/55395d42-1bf3-4833-83e6-3f9a7878559a" />
 
 
+Conclusion:
+
+This project showcases a basic CI/CD implementation using Jenkins and Docker, helping automate application deployment and improve delivery efficiency.
+
+
+
 
 
 
